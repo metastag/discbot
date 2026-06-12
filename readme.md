@@ -2,16 +2,12 @@ A Discord bot that automatically sanitizes Instagram URLs posted in chat — rew
 
 ### Features
 
-- **Instagram URL sanitization** — replaces `instagram.com` → `kkinstagram.com` to trigger Discord embeds
-- **Privacy stripping** — removes the `?igsh=` tracking parameter from Instagram URLs
+- **Chess leaderboard** - Add a way to track local chess tournament winners
+- **Instagram URL sanitization** — replaces `instagram.com` → `kkinstagram.com` to trigger Discord embeds and removes the `?igsh=` tracking parameter from Instagram URLs
 - **Rate limiting** — Uses a simple fixed window approach to limit requests at 100req every 5 minutes
-- **Original message deletion** — deletes the user's original message and reposts a cleaned version
-- **Attribution** — optionally appends "Sent by: @user" to the sanitized message
 
 ### Future Work
-
-- **Persistent storage**
-- **Chess leaderboard** - Add a way to track local chess tournament winners
+- If adding more cogs, restruct repository layer and help command (currently designed for winners cog only)
 - **Economy** - Add an economy system powered by chess matches, a way to earn, trade, buy items and bet money
 
 ## Getting started
@@ -33,10 +29,12 @@ $ source .venv/bin/activate # for mac/linux
 $ pip install -r requirements.txt
 
 # Create a .env file with your bot token
-echo "DISCORD_TOKEN=your_token_here" > .env
+$ echo "DISCORD_TOKEN=your_token_here" > .env
+
+# Add DB_NAME, DB_USER, DB_PASSWORD to .env file as well
 
 # Run the bot
-python main.py
+$ python main.py
 ```
 
 The bot will connect and print `Bot <name> is ready!` once it's online.
@@ -65,10 +63,13 @@ To change defaults, edit the values directly in `cogs/sanitize.py`.
 
 ## How it works
 
+A postgres database is used to store chess tournament wins. Then with a few simple queries we can fetch leaderboards, or user stats. check `cogs/winners.py`
+
 The `kkinstagram.com` domain is a community-maintained proxy that serves the same Instagram content but returns proper Open Graph metadata, which Discord uses to generate link embeds.
 
-## Edge cases
+## Caveats
 
+- **Add Winner command requires moderator role** to prevent abuse by random people who can spam this command, only trusted people given the moderator role can run this command
 - **Rate limiting is per bot instance**, not per guild or per user. At 100 requests per 5 minutes, a busy server can hit the cap. Increase `max_requests` or `time_window` if needed.
 - **Message deletion requires permissions.** If the bot's role lacks Manage Messages in a channel, it logs `"Could not delete user message ... - Forbidden"` and leaves the original in place. The sanitized copy is still posted alongside it.
 

@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 from bot import bot
 
-# Load discord token from .env
+# Load discord token from environment
 load_dotenv()
 token = os.getenv("DISCORD_TOKEN")
 

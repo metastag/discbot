@@ -64,14 +64,8 @@ class Sanitize(commands.Cog):
 			if self._is_instagram_url(url):
 				insta_urls.append(url)
 
-		# If no insta urls found, treat like a regular command
-		if not insta_urls:
-			await self.bot.process_commands(message)
-			return
-
-		# If rate limit hit, treat like a regular command
-		if self._check_rate_limit_hit():
-			await self.bot.process_commands(message)
+		# If no insta urls found or hit rate limit, stop processing
+		if not insta_urls or self._check_rate_limit_hit():
 			return
 
 		content = message.content
