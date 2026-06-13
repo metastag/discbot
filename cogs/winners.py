@@ -3,12 +3,21 @@
 import discord
 from discord.ext import commands
 from db.repo import RepoError
+from urllib.parse import urlparse
 
 
 class Winners(commands.Cog):
 	def __init__(self, bot):
 		self.bot = bot
 		self.repo = bot.repo
+
+	# Checks if a url belongs to chess.com domain, returns boolean
+	def _is_chess_com_url(self, url: str) -> bool:
+		try:
+			parsed = urlparse(url)
+			return parsed.netloc == "www.chess.com"
+		except Exception:
+			return False
 
 	@commands.command()
 	async def help(self, ctx):
@@ -22,12 +31,24 @@ class Winners(commands.Cog):
 	@commands.command()
 	@commands.has_role("moderator")
 	async def addwinner(self, ctx, user: discord.Member, url):
+		# Basic length validation on url
+		if len(url) < 32 or len(url) > 254:
+			await ctx.send("Invalid url")
+			return
+
+		# Check if url domain is chess.com		
+		if not self._is_chess_com_url(url):
+			await ctx.send("Invalid url")
+			return
+
+		# Send to repo for saving in database
 		try:
 			await self.repo.add_win(str(user.id), url)
 		except RepoError:
 			await ctx.send("Error - please try again later")
 			return
 
+		# Retrieve new win count and send as response
 		win_count = await self.repo.get_win_count(str(user.id))
 		await ctx.send(f"{user.mention} now has {win_count} wins! :balloon:")
 

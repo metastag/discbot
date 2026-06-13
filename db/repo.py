@@ -26,7 +26,7 @@ class WinRepository:
 			async with self.pool.acquire() as conn:
 				rows = await conn.fetch("""
 					SELECT player_id, COUNT(*) AS won FROM wins
-					GROUP BY player_id ORDER BY won DESC
+					GROUP BY player_id ORDER BY won DESC, player_id ASC
 				""")
 				return rows
 		except Exception as e:
@@ -49,7 +49,7 @@ class WinRepository:
 			async with self.pool.acquire() as conn:
 				rows = await conn.fetch("""
 					SELECT tournament_url, won_at FROM wins
-					WHERE player_id=$1
+					WHERE player_id=$1 ORDER BY won_at DESC
 				""", player_id)
 				return rows
 		except Exception as e:

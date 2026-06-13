@@ -26,7 +26,6 @@ class Sanitize(commands.Cog):
 		try:
 			parsed = urlparse(url)
 			return parsed.netloc in ("www.instagram.com", "instagram.com")
-
 		except Exception:
 			return False
 

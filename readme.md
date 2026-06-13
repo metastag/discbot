@@ -1,13 +1,17 @@
-A Discord bot that automatically sanitizes Instagram URLs posted in chat — rewrites them to use `kkinstagram.com` (enabling Discord embeds) and strips tracking parameters for privacy.
+### Discord bot
+
+A Discord bot that tracks local server chess tournament winners and automatically sanitizes instagram urls
 
 ### Features
 
-- **Chess leaderboard** - Add a way to track local chess tournament winners
+- **Chess leaderboard** - Track local chess tournament winners
 - **Instagram URL sanitization** — replaces `instagram.com` → `kkinstagram.com` to trigger Discord embeds and removes the `?igsh=` tracking parameter from Instagram URLs
 - **Rate limiting** — Uses a simple fixed window approach to limit requests at 100req every 5 minutes
 
 ### Future Work
-- If adding more cogs, restruct repository layer and help command (currently designed for winners cog only)
+- Extend rate limiting to all cogs
+- Abstract db connection away from bot.py
+- If adding more cogs, restructure repository layer and help command to support multiple cogs
 - **Economy** - Add an economy system powered by chess matches, a way to earn, trade, buy items and bet money
 
 ## Getting started
@@ -34,6 +38,7 @@ $ echo "DISCORD_TOKEN=your_token_here" > .env
 # Add DB_NAME, DB_USER, DB_PASSWORD to .env file as well
 
 # Run the bot
+$ docker compose up -d # starts postgres instance
 $ python main.py
 ```
 

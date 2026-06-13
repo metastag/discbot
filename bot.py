@@ -12,11 +12,24 @@ db_name = os.getenv("DB_NAME")
 db_user = os.getenv("DB_USER")
 db_pass = os.getenv("DB_PASSWORD")
 
+if not db_name:
+	print("Could not load DB_NAME env variable")
+	exit(1)
+elif not db_user:
+	print("Could not load DB_USER env variable")
+	exit(1)
+elif not db_pass:
+	print("Could not lod DB_PASSWORD env variable")
+	exit(1)
+
 # Function to load cogs
 async def load_cogs():
 	for file in os.listdir("./cogs"):
 		if file.endswith(".py") and not file.startswith("__"):
-			await bot.load_extension(f"cogs.{file[:-3]}")
+			try:
+				await bot.load_extension(f"cogs.{file[:-3]}")
+			except Exception as e:
+				print(f"Failed to load cog {file} - {e}")
 
 # Initialize intents
 intents = discord.Intents.default()
@@ -50,7 +63,7 @@ async def setup_hook():
 		pool = await create_pool(db_name, db_user, db_pass)
 	except Exception as e:
 		print("Failed to create connection pool -", e)
-		exit()
+		exit(1)
 
 	# Create repository
 	repo = WinRepository(pool)
@@ -63,6 +76,10 @@ async def setup_hook():
 	await load_cogs()
 
 # Graceful shutdown
-@bot.event
-async def on_close():
+original_close = bot.close
+async def graceful_shutdown():
+	print("Closing database pool and exiting...")
 	await bot.db_pool.close()
+	await original_close()
+
+bot.close = graceful_shutdown
