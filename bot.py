@@ -2,24 +2,14 @@
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
-from db.conn import create_pool
 from db.repo import WinRepository
 import os
 
-# Load database variables from environment
+# Load database connection string
 load_dotenv()
-db_name = os.getenv("DB_NAME")
-db_user = os.getenv("DB_USER")
-db_pass = os.getenv("DB_PASSWORD")
-
-if not db_name:
-	print("Could not load DB_NAME env variable")
-	exit(1)
-elif not db_user:
-	print("Could not load DB_USER env variable")
-	exit(1)
-elif not db_pass:
-	print("Could not lod DB_PASSWORD env variable")
+dsn = os.getenv("DSN")
+if not dsn:
+	print("Could not load DSN env variable")
 	exit(1)
 
 # Function to load cogs
@@ -52,34 +42,19 @@ async def on_command_error(ctx, error):
 		await ctx.send("Member not found")
 	elif isinstance(error, commands.MissingRequiredArgument):
 		await ctx.send("Missing required argument, enter $help to see a list of commands with their arguments")
+	elif isinstance(error, commands.CommandNotFound):
+		await ctx.send("Invalid command, enter $help to see a list of commands")
 	else:
 		raise error
 
 # Runs during initializing
 @bot.event
 async def setup_hook():
-	# Create database pool
-	try:
-		pool = await create_pool(db_name, db_user, db_pass)
-	except Exception as e:
-		print("Failed to create connection pool -", e)
-		exit(1)
-
 	# Create repository
-	repo = WinRepository(pool)
+	repo = WinRepository(dsn)
 
 	# Attach repo to bot object
 	bot.repo = repo
-	bot.db_pool = pool
 
 	# Load cogs
 	await load_cogs()
-
-# Graceful shutdown
-original_close = bot.close
-async def graceful_shutdown():
-	print("Closing database pool and exiting...")
-	await bot.db_pool.close()
-	await original_close()
-
-bot.close = graceful_shutdown

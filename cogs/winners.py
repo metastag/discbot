@@ -15,7 +15,7 @@ class Winners(commands.Cog):
 	def _is_chess_com_url(self, url: str) -> bool:
 		try:
 			parsed = urlparse(url)
-			return parsed.netloc == "www.chess.com"
+			return parsed.netloc in ("www.chess.com", "chess.com")
 		except Exception:
 			return False
 
